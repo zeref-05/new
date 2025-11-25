@@ -1,0 +1,75 @@
+create table Employe ( Eno number(3), Ename varchar2(20), Address varchar2(30),
+Email varchar(20), Salary number );
+
+create table Employe2 ( Eno number(3), Ename varchar2(20), Address  varchar2(30), Email varchar(20), Salary number ); 
+
+
+CREATE DATABASE LINK "LINK1" USING 'XE';
+CREATE DATABASE LINK "LINK2" USING 'XE'; 
+
+
+create or replace Trigger insert_data  
+after insert on Employe  
+for each row  
+begin  
+insert into Employe2@LINK2  
+values (:new.Eno,:new.Ename,:new.Address,:new.Email,:new.Salary);  end; 
+/ 
+
+create or replace Trigger del_data  
+before delete on Employe  
+for each row  
+begin  
+delete from Employe2@LINK2  
+where Eno=:old.Eno;  
+end; 
+/ 
+
+create or replace Trigger update_data  
+after update on Employe  
+for each row  
+begin  
+update Employe2@LINK2  
+set Eno =:new.Eno,  
+Ename =:new.Ename,  
+Address = :new.Address,  
+Email=:new.Email,  
+Salary=:new.Salary 
+where Eno=:old.Eno;  
+end; 
+/ 
+
+
+insert into Employe  values(111,'Shweta','Goregaon','shweta@yahoo.com',100000);  
+insert into Employe  values(112,'Sweha','Goregaon','sweha@yahoo.com',10400);  
+insert into Employe values(113,'Lata','Virar',’lata@yahoo.com',100000);  
+insert into Employe values(114,'Sheejal','Goregaon','sheejal@yahoo.com',15000);  
+insert into Employevalues(115,'Shalmali','Jogeshwari','shalmali@yahoo.com',5000); 
+insert into Employe values(116,'Meghna','Borivali','meghna@yahoo.com',100000); 
+insert into Employe values(117,'Swati','Andheri','swati@yahoo.com',15000); 
+insert into Employe  values(118,'Reena','Kandivali','reena@yahoo.com',300000);  
+insert into Employe   values(119,'Niyati','Malad','niyati@yahoo.com',15000);  
+insert into Employe values(120,'Ekta','Kandivali','ekta@yahoo.com',20000); 
+
+
+
+select * from Employe@LINK1;
+select * from Employe2@LINK2;
+
+
+select salary from Employe@LINK1; 
+select salary from Employe2@LINK2;
+
+
+select email from Employe@LINK1 where salary = 15000; 
+select email from Employe2@LINK2 where salary = 15000;
+
+
+select ename, email from Employe@LINK1 where eno = 120 and ename = 'Ekta'; 
+select ename, email from Employe2@LINK2 where eno = 120 and ename = 'Ekta'; 
+
+
+select ename, address from Employe@LINK1 where eno = 111; 
+select ename, address from Employe2@LINK2 where eno = 111; 
+select ename, email from Employe2@LINK2 where eno = 111;
+

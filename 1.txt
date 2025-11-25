@@ -1,0 +1,57 @@
+connect system/123
+create user sales_user identified by admin;
+grant create session to sales_user;
+grant create table to sales_user;
+grant resource to sales_user;
+
+create user sales_dtls identified by admin;
+grant create session to sales_dtls;
+grant create table to sales_user;
+grant resource to sales_dtls;
+
+
+connect sales_user/admin
+CREATE TABLE sales_order (order_id NUMBER(5), client_name VARCHAR2(30), order_date DATE);
+INSERT INTO sales_order VALUES (101, 'Alice Smith', TO_DATE('2025-10-10', 'YYYY-MM-DD'));
+INSERT INTO sales_order VALUES (102, 'Bob Johnson', TO_DATE('2025-10-11', 'YYYY-MM-DD'));
+INSERT INTO sales_order VALUES (103, 'Charlie Davis', TO_DATE('2025-10-12', 'YYYY-MM-DD'));
+INSERT INTO sales_order VALUES (104, 'Diana Moore', TO_DATE('2025-10-13', 'YYYY-MM-DD'));
+INSERT INTO sales_order VALUES (105, 'Ethan Brown', TO_DATE('2025-10-14', 'YYYY-MM-DD'));
+select * from sales_order;
+
+connect sales_dtls/admin
+CREATE TABLE sales_order_details (order_id NUMBER(5), product_name VARCHAR2(30), quantity NUMBER(5), price NUMBER(10, 2));
+INSERT INTO sales_order_details VALUES (101, 'Laptop', 1, 75000.00);
+INSERT INTO sales_order_details VALUES (102, 'Smartphone', 2, 30000.00);
+INSERT INTO sales_order_details VALUES (103, 'Headphones', 3, 2500.00);
+INSERT INTO sales_order_details VALUES (104, 'Monitor', 1, 12000.00);
+INSERT INTO sales_order_details VALUES (105, 'Keyboard', 2, 1500.00);
+select * from sales_order_details;
+
+
+connect system/123
+CREATE PUBLIC DATABASE LINK sales_link1 CONNECT TO sales_user IDENTIFIED BY admin USING 'XE';
+CREATE PUBLIC DATABASE LINK sales_link2 CONNECT TO sales_dtls IDENTIFIED BY admin USING 'XE';
+
+
+SELECT
+    sales_order.order_id@sales_link1,
+    sales_order.client_name,
+    sales_order.order_date,
+    sales_order_details.product_name,
+    sales_order_details.quantity,
+    sales_order_details.price
+FROM
+    sales_order@sales_link1,
+    sales_order_details@sales_link2
+WHERE
+    sales_order.order_id@sales_link1 = sales_order_details.order_id@sales_link2;
+
+
+
+
+drop public database link sales_link1;
+drop public database link sales_link2;
+
+DROP USER sales_user CASCADE;
+DROP USER sales_dtls CASCADE;

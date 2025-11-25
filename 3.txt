@@ -1,0 +1,63 @@
+connect system/123
+create user scott identified by admin;
+grant create session to scott;
+grant create table to scott;
+grant resource to scott;
+create user mscit identified by admin;
+grant create session to mscit;
+grant create table to mscit;
+grant resource to mscit;
+
+
+connect scott/admin
+create table emp11( eno number(6), ename varchar2(15), address  varchar2(20), email varchar2(15), salary number(6));
+insert into emp11 values(1001,'Suhas','Pune','suhas@gmail.com',10000);
+insert into emp11 values(1002,'Rajesh','Thane','raj@gmail.com',20000);
+insert into emp11 values(1004,'Mahesh','Nashik','mm@yahoo.com',3000);
+insert into emp11 values(1006,’Prakash’,’Nagpur’,’pk@rediff.com’,5000);
+insert into emp11 values(1008,’Rahul’,’Pune’,’rahul@dot.com’,6000);
+selct * from emp11;
+
+connect mscit/admin
+create table employee12(eno number(6), ename varchar2(15), address varchar2(20), email varchar2(15), salary number(6));
+insert into employee12 values(1003,'Shiva','Banglore','ss@hotmail.com',4000);
+insert into employee12 values(1005,'Sita','Delhi','sita@yahoo.com',7000);
+insert into employee12 values(1007,'Ramesh','Kerala','r_sh@yahoo.com',3000);
+insert into employee12 values(1009,'Rakesh','Pune','rak@yahoo.com',2000);
+insert into employee12 values(1010,'Sudha','Nashik','sudha@yahoo.com',6000);
+select * from employee12;
+
+
+connect system/123
+create public database link emp_link11 connect to scott identified by admin using 'XE';
+create public database link emp_link12 connect to mscit identified by admin using 'XE';
+
+select * from emp11@emp_link11;
+select * from employee12@emp_link12;
+
+select distinct eno, Salary from emp11@emp_link11
+union
+select distinct eno, Salary from employee12@emp_link12 ;
+
+select distinct eno, email from emp11@emp_link11 where salary > 5000
+union
+select distinct eno, email from employee12@emp_link12 where salary > 5000 ;
+
+select distinct eno, email from emp11@emp_link11 where eno=1008
+union
+select distinct eno, email from employee12@emp_link12 where eno=1008 ;
+
+select distinct ename, address from emp11@emp_link11 where eno=1010
+union
+select distinct ename, address from employee12@emp_link12 where eno=1010 ;
+
+
+drop public database link emp_link11;
+drop public database link emp_link12;
+DROP USER scott CASCADE;
+DROP USER mscit CASCADE;
+
+
+
+
+

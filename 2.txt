@@ -1,0 +1,61 @@
+connect system/123
+create user scott identified by admin;
+grant create session to scott;
+grant create table to scott;
+grant resource to scott;
+create user mscit identified by admin;
+grant create session to mscit;
+grant create table to mscit;
+grant resource to mscit;
+
+
+connect scott/admin
+
+create table emp1(
+eno number(5),
+name varchar2(20),
+address varchar2(20));
+
+insert into emp1 values(1, 'vidaya', 'airoli');
+insert into emp1 values(2, 'piyush', 'panvel');
+insert into emp1 values(3, 'sahil', 'navade');
+insert into emp1 values(4, 'pavan', 'thane');
+insert into emp1 values(5, 'varun', 'pune');
+
+
+
+connect mscit/admin
+
+create table emp2(
+eno number(5),
+email varchar2(20),
+salary number(8));
+
+insert into emp2 values(1, 'vidaya@gmail.com', 5500);
+insert into emp2 values(2, 'piyush@gmail.com', 11000);
+insert into emp2 values(3, 'sahil@gmail.com', 5100);
+insert into emp2 values(4, 'pavan@gmail.com', 6100);
+insert into emp2 values(5, 'varun@gmail.com', 8100);
+
+
+connect system/123
+
+create public database link emp_link1 connect to scott identified by admin using 'XE';
+create public database link emp_link2 connect to mscit identified by admin using 'XE';
+
+select emp1.eno@emp_link1,name,address,email,salary from emp1@emp_link1,emp2@emp_link2 where emp1.eno@emp_link1 = emp2.eno@emp_link2;
+
+select emp1.eno@emp_link1,name,salary from emp1@emp_link1,emp2@emp_link2 where emp1.eno@emp_link1 = emp2.eno@emp_link2 and emp2.eno@emp_link2 = 1;
+
+select emp1.eno@emp_link1,emp2.email@emp_link2 from emp1@emp_link1,emp2@emp_link2 where emp1.name@emp_link1 = 'pavan' and emp1.eno@emp_link1 = emp2.eno@emp_link2;
+
+select emp1.eno@emp_link1,name,email from emp1@emp_link1,emp2@emp_link2 where emp1.eno@emp_link1 = 2 and emp1.eno@emp_link1 = emp2.eno@emp_link2;
+
+select emp1.name@emp_link1, emp2.salary@emp_link2 from emp1@emp_link1,emp2@emp_link2 where emp2.salary@emp_link2 >5000 and emp1.eno@emp_link1 = emp2.eno@emp_link2;
+
+
+
+drop public database link emp_link1;
+drop public database link emp_link2;
+DROP USER scott CASCADE;
+DROP USER mscit CASCADE;
